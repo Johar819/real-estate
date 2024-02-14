@@ -1,10 +1,12 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const dotenv = require('dotenv');
-const userRouter = require('./routes/user.route.js')
-const authRouter = require('./routes/auth.route.js')
+const dotenv = require("dotenv");
+const userRouter = require("./routes/user.route.js");
+const authRouter = require("./routes/auth.route.js");
+const cookieParser = require("cookie-parser");
 dotenv.config();
-mongoose.connect(process.env.MONGODB_URL, {})
+mongoose
+  .connect(process.env.MONGODB_URL, {})
   .then(() => {
     console.log("Database Connection Established Successfully");
   })
@@ -14,9 +16,10 @@ mongoose.connect(process.env.MONGODB_URL, {})
     process.exit(1);
   });
 const app = express();
+app.use(cookieParser());
 app.use(express.json());
-app.use('/api/user',userRouter);
-app.use('/api/auth',authRouter);
+app.use("/api/user", userRouter);
+app.use("/api/auth", authRouter);
 app.use((err, req, res, next) => {
   const status = err.status || 500;
   const message = err.message || "Something went wrong!";
@@ -24,8 +27,8 @@ app.use((err, req, res, next) => {
     success: false,
     status,
     message,
-  })
-})
+  });
+});
 app.listen(3000, () => {
   console.log("Server is running at port 3000!");
 });

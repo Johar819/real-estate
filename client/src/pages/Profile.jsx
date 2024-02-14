@@ -12,6 +12,7 @@ const Profile = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    password:"",
     img: currentUser.others.avatar
   });
   useEffect(() => {

@@ -66,7 +66,7 @@ exports.google = async (req, res, next) => {
         process.env.JWT_SECRET
       );
       res
-        .cookie("access_token", token, {
+        .cookie('access_token', token, {
           httpOnly: true,
         })
         .status(200)
@@ -94,6 +94,8 @@ exports.google = async (req, res, next) => {
         process.env.JWT_SECRET
       );
       const { password: pass, ...others } = newUser._doc;
+    console.log("others",others);
+
       res
         .cookie("access_token", jwtToken, {
           httpOnly: true,
