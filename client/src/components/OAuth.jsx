@@ -11,16 +11,15 @@ const OAuth = () => {
             const provider = new GoogleAuthProvider();
             const auth = getAuth(app);
             const result = await signInWithPopup(auth, provider);
-            console.log(result);
             const res = await fetch('/api/auth/google', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({email: result.user.email, name: result.user.displayName, img: result.user.photoURL})
+                body: JSON.stringify({email: result.user.email, name: result.user.displayName, avatar: result.user.photoURL})
             });
             const data = await res.json();
-            dispatch(signInSuccess(data));
+            dispatch(signInSuccess(data.others));
             navigate('/');
         } catch (error) {
             console.log("Couldn't sign in with google",error)

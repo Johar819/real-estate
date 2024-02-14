@@ -9,7 +9,7 @@ exports.verifyUser = async (req,res,next)=>{
             if(err){
                 return next(errorHandler(403, "Please login again"))
             }
-            console.log("User",user);
+            // console.log("User",user);
             req.user = user;
             next();
         });

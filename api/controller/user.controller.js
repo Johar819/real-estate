@@ -8,6 +8,7 @@ exports.test = (req, res) => {
 };
 
 exports.updateUser = async (req, res, next) => {
+    console.log("in updateUser")
   try {
     if (req.user.id !== req.params.id)
       return next(errorHandler(403, "You can update only your account"));
@@ -18,10 +19,10 @@ exports.updateUser = async (req, res, next) => {
       req.params.id,
       {
         $set: {
-          username: req.body.username,
+          username: req.body.name,
           email: req.body.email,
           password: req.body.password,
-          avatar: req.body.img,
+          avatar: req.body.avatar,
         },
       },
       { new: true }
@@ -30,7 +31,7 @@ exports.updateUser = async (req, res, next) => {
     res.status(200).json({
         success: true,
         message: "User updated successfully",
-        user: others
+        others
     });
   } catch (error) {
     return next(errorHandler(500, error.message));
