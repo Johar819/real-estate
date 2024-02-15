@@ -108,3 +108,16 @@ exports.google = async (req, res, next) => {
     next(error);
   }
 };
+
+//sign out
+exports.signout = (req, res,next) => {
+  try {
+    return res.status(200).clearCookie("access_token").json({
+      message: "User logged out successfully",
+      success: true
+    })
+  } catch (error) {
+    next(error)
+    
+  }
+}

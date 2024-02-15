@@ -3,9 +3,19 @@ import { useSelector } from "react-redux"
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import { useEffect } from "react";
 import { app } from "../firebase";
-import { updateUserStart, updateUserSuccess, updateUserFailure, deleteUserStart, deleteUserSuccess, deleteUserFailure } from "../redux/user/userSlice"
+import {
+  updateUserStart,
+  updateUserSuccess,
+  updateUserFailure,
+  deleteUserStart,
+  deleteUserSuccess,
+  deleteUserFailure,
+  signOutStart,
+  signOutSuccess,
+  signOutFailure
+} from "../redux/user/userSlice"
 import { useDispatch } from "react-redux";
-import {FaEdit} from 'react-icons/fa'
+import { FaEdit } from 'react-icons/fa'
 const Profile = () => {
   const { currentUser, loading, error } = useSelector(state => state.user);
   const dispatch = useDispatch();
@@ -26,7 +36,7 @@ const Profile = () => {
   }, [file])
   useEffect(() => {
     setProfileUpdate(0);
-  },[])
+  }, [])
   const handleFileUpload = () => {
     const fileName = new Date().getTime() + file.name;
     const storage = getStorage(app);
@@ -74,23 +84,43 @@ const Profile = () => {
       setProfileUpdate(-1);
     }
   }
-  const handleDelete = async() => {
+  const handleDelete = async () => {
     try {
       dispatch(deleteUserStart());
       const res = await fetch(`/api/user/delete/${currentUser._id}`, {
-        method: 'DELETE', 
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
         },
       });
       const data = await res.json();
-      if(data.success===false){
+      if (data.success === false) {
         dispatch(deleteUserFailure(data.message));
       }
       dispatch(deleteUserSuccess());
-    }catch(err){
+    } catch (err) {
       dispatch(deleteUserFailure(err.message));
       setProfileUpdate(-1);
+    }
+  }
+  const handleSignOut = async () => {
+    try {
+      dispatch(signOutStart());
+      const res = await fetch('/api/auth/signout', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        console.log("error in signout");
+        dispatch(signOutFailure(data.message));
+        return;
+      }
+      dispatch(signOutSuccess());
+    } catch (error) {
+      dispatch(signOutFailure(error.message));
     }
   }
   return (
@@ -108,28 +138,28 @@ const Profile = () => {
           className="rounded-full w-24 h-24 object-cover cursor-pointer self-center hover:opacity-80"
           onClick={() => fileRef.current.click()}
         />
-          <span onClick={() => setEdit(!edit)} className="text-slate-700 hover:text-red-500 cursor-pointer self-end"><FaEdit/></span>
+        <span onClick={() => setEdit(!edit)} className="text-slate-700 hover:text-red-500 cursor-pointer self-end"><FaEdit /></span>
         {
           fileUploadError ? (<p className="text-red-500 mx-auto">Error in uploading</p>) :
             progressPerc > 0 && progressPerc < 100 ? (<p className="text-slate-700 max-auto">File uploadding... {progressPerc}%</p>) : progressPerc === 100 ? (<p className="text-green-500 mx-auto">File uploaded successfully</p>) : ""
         }
         <input type="text" placeholder="name" id="name" defaultValue={currentUser.username} onChange={handleChange} disabled={!edit} className={`${edit && "bg-slate-900 border text-white"} p-3 rounded-lg`} />
-        <input type="text" placeholder="email" id="email" defaultValue={currentUser.email} onChange={handleChange} disabled={!edit} className={`${edit && "bg-slate-900 border text-white"} p-3 rounded-lg` } />
+        <input type="text" placeholder="email" id="email" defaultValue={currentUser.email} onChange={handleChange} disabled={!edit} className={`${edit && "bg-slate-900 border text-white"} p-3 rounded-lg`} />
         <input type="password" placeholder="password" id="password" onChange={handleChange} disabled={!edit} className={`${edit && "bg-slate-900 border text-white"} p-3 rounded-lg`} />
-        <button type="submit" disabled={loading} className={`${edit? "bg-red-700":"bg-slate-700"} text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80`}>Update</button>
+        <button type="submit" disabled={loading} className={`${edit ? "bg-red-700" : "bg-slate-700"} text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80`}>Update</button>
         {
-          loading?(
+          loading ? (
             <p className="text-slate-500 mx-auto">Updating...</p>
-          ):profileUpdate===-1?(
+          ) : profileUpdate === -1 ? (
             <p className="text-red-500 mx-auto italic">Error:{" " + error}</p>
-          ):profileUpdate===1?(
+          ) : profileUpdate === 1 ? (
             <p className="text-green-500 mx-auto">Updated Successful</p>
-          ):null
+          ) : null
         }
       </form>
       <div className="flex justify-between mt-5">
         <span className="text-red-500 cursor-pointer" onClick={handleDelete}>Delete Account</span>
-        <span className="text-red-500">Sign Out</span>
+        <span onClick={handleSignOut} className="text-red-500 cursor-pointer">Sign Out</span>
       </div>
     </div>
 
