@@ -8,7 +8,6 @@ exports.test = (req, res) => {
 };
 
 exports.updateUser = async (req, res, next) => {
-    console.log("in updateUser")
   try {
     if (req.user.id !== req.params.id)
       return next(errorHandler(403, "You can update only your account"));
@@ -32,6 +31,22 @@ exports.updateUser = async (req, res, next) => {
         success: true,
         message: "User updated successfully",
         others
+    });
+  } catch (error) {
+    return next(errorHandler(500, error.message));
+  }
+};
+
+
+//delete User controller 
+exports.deleteUser = async (req, res, next) => {
+  try {
+    if (req.user.id !== req.params.id)
+      return next(errorHandler(403, "You can delete only your account"));
+    await User.findByIdAndDelete(req.params.id);
+    res.status(200).clearCookie("access_token").json({
+      success: true,
+      message: "User deleted successfully",
     });
   } catch (error) {
     return next(errorHandler(500, error.message));

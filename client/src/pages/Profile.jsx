@@ -3,11 +3,11 @@ import { useSelector } from "react-redux"
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import { useEffect } from "react";
 import { app } from "../firebase";
-import { updateUserStart, updateUserSuccess, updateUserFailure } from "../redux/user/userSlice"
+import { updateUserStart, updateUserSuccess, updateUserFailure, deleteUserStart, deleteUserSuccess, deleteUserFailure } from "../redux/user/userSlice"
 import { useDispatch } from "react-redux";
 import {FaEdit} from 'react-icons/fa'
 const Profile = () => {
-  const { currentUser, loading } = useSelector(state => state.user);
+  const { currentUser, loading, error } = useSelector(state => state.user);
   const dispatch = useDispatch();
   const fileRef = useRef();
   const [file, setFile] = useState(null);
@@ -16,9 +16,6 @@ const Profile = () => {
   const [edit, setEdit] = useState(false);
   const [profileUpdate, setProfileUpdate] = useState(0);
   const [formData, setFormData] = useState({});
-  useEffect(() => {
-    setProfileUpdate(0);
-  },[])
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   }
@@ -27,6 +24,9 @@ const Profile = () => {
       handleFileUpload();
     }
   }, [file])
+  useEffect(() => {
+    setProfileUpdate(0);
+  },[])
   const handleFileUpload = () => {
     const fileName = new Date().getTime() + file.name;
     const storage = getStorage(app);
@@ -68,8 +68,28 @@ const Profile = () => {
       }
       dispatch(updateUserSuccess(data.others));
       setProfileUpdate(1);
+      setEdit(false);
     } catch (error) {
       dispatch(updateUserFailure(error.message));
+      setProfileUpdate(-1);
+    }
+  }
+  const handleDelete = async() => {
+    try {
+      dispatch(deleteUserStart());
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: 'DELETE', 
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      });
+      const data = await res.json();
+      if(data.success===false){
+        dispatch(deleteUserFailure(data.message));
+      }
+      dispatch(deleteUserSuccess());
+    }catch(err){
+      dispatch(deleteUserFailure(err.message));
       setProfileUpdate(-1);
     }
   }
@@ -99,16 +119,16 @@ const Profile = () => {
         <button type="submit" disabled={loading} className={`${edit? "bg-red-700":"bg-slate-700"} text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80`}>Update</button>
         {
           loading?(
-            <p className="text-green-500 mx-auto">Updating...</p>
-          ):profileUpdate===1?(
-            <p className="text-green-500 mx-auto">Profile Updated</p>
+            <p className="text-slate-500 mx-auto">Updating...</p>
           ):profileUpdate===-1?(
-            <p className="text-red-500 mx-auto">Update Failed</p>
+            <p className="text-red-500 mx-auto italic">Error:{" " + error}</p>
+          ):profileUpdate===1?(
+            <p className="text-green-500 mx-auto">Updated Successful</p>
           ):null
         }
       </form>
       <div className="flex justify-between mt-5">
-        <span className="text-red-500">Delete Account</span>
+        <span className="text-red-500 cursor-pointer" onClick={handleDelete}>Delete Account</span>
         <span className="text-red-500">Sign Out</span>
       </div>
     </div>
