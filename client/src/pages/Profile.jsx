@@ -3,6 +3,7 @@ import { useSelector } from "react-redux"
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import { useEffect } from "react";
 import { app } from "../firebase";
+import { Link } from "react-router-dom"
 import {
   updateUserStart,
   updateUserSuccess,
@@ -156,6 +157,9 @@ const Profile = () => {
             <p className="text-green-500 mx-auto">Updated Successful</p>
           ) : null
         }
+        <Link className="bg-green-700 text-white p-3 rounded-lg hover:opacity-95 text-center" to="/create-listing" >
+          Create Listing
+        </Link>
       </form>
       <div className="flex justify-between mt-5">
         <span className="text-red-500 cursor-pointer" onClick={handleDelete}>Delete Account</span>
