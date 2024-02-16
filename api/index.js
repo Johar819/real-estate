@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const userRouter = require("./routes/user.route.js");
 const authRouter = require("./routes/auth.route.js");
+const listRouter = require("./routes/list.route.js");
 const cookieParser = require("cookie-parser");
 dotenv.config();
 mongoose
@@ -20,6 +21,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/list", listRouter);
 app.use((err, req, res, next) => {
   const status = err.statusCode || 500;
   const message = err.message || "Something went wrong!";
