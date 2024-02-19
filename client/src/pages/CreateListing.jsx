@@ -24,7 +24,7 @@ const CreateListing = () => {
         regularPrice: 0,
         discountPrice: 0,
         offer: false,
-        imageUrls: [],
+        imageURLs: [],
     });
     const navigate = useNavigate();
     const handleChange = (e) => {
@@ -39,7 +39,7 @@ const CreateListing = () => {
         }
     }
     const handleImageSubmit = () => {
-        if (file.length > 0 && file.length + formData.imageUrls.length < 7) {
+        if (file.length > 0 && file.length + formData.imageURLs.length < 7) {
             setUploading(true);
             setImageUploadError(false);
             setIsUploaded(false);
@@ -48,7 +48,7 @@ const CreateListing = () => {
                 promises.push(storeImage(file[i]));
             }
             Promise.all(promises).then((urls) => {
-                setFormData((prev) => ({ ...prev, imageUrls: formData.imageUrls.concat(urls) }));
+                setFormData((prev) => ({ ...prev, imageURLs: formData.imageURLs.concat(urls) }));
                 setUploading(false);
                 setIsUploaded(true);
             }).catch((error) => {
@@ -56,7 +56,7 @@ const CreateListing = () => {
                 setUploading(false);
                 setIsUploaded(false);
             })
-        } else if (file.length + formData.imageUrls.length > 6) {
+        } else if (file.length + formData.imageURLs.length > 6) {
             setImageUploadError("You can upload maximum 6 images per listing");
             setIsUploaded(false);
         } else {
@@ -87,7 +87,7 @@ const CreateListing = () => {
         })
     }
     const handleRemoveImage = (index) => {
-        setFormData((prev) => ({ ...prev, imageUrls: prev.imageUrls.filter((_, i) => i !== index) }));
+        setFormData((prev) => ({ ...prev, imageURLs: prev.imageURLs.filter((_, i) => i !== index) }));
     }
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -194,7 +194,7 @@ const CreateListing = () => {
                     <p className="text-red-700 italic">{imageUploadError && "Error : " + imageUploadError}</p>
 
                     {
-                        formData.imageUrls.length > 0 && formData.imageUrls.map((url, index) => (
+                        formData.imageURLs.length > 0 && formData.imageURLs.map((url, index) => (
                             <div key={url} className="flex justify-between items-center border border-gray-300 mb-1 p-1 rounded-lg">
                                 <img src={url} alt="image" className="w-[100px] h-auto object-cover mb-1 rounded-lg" />
                                 <button className="p-2 bg-white-700 text-red-700 font-semibold rounded-lg uppercase hover:bg-red-700 hover:text-white hover:opacity-95 disabled:80" onClick={() => handleRemoveImage(index)}>Remove</button>

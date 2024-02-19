@@ -1,6 +1,7 @@
 const { errorHandler } = require("../utils/error");
 const User = require("../models/user.model");
 const bcryptjs = require("bcryptjs");
+const List = require("../models/list.model");
 exports.test = (req, res) => {
   res.json({
     message: "API route is working",
@@ -47,6 +48,22 @@ exports.deleteUser = async (req, res, next) => {
     res.status(200).clearCookie("access_token").json({
       success: true,
       message: "User deleted successfully",
+    });
+  } catch (error) {
+    return next(errorHandler(500, error.message));
+  }
+};
+
+//get lists
+exports.getUserLists = async (req, res, next) => {
+  try {
+    if (req.user.id !== req.params.id)
+      return next(errorHandler(401, "You can get only your own Listings!"));
+
+    const lists = await List.find({userRef: req.params.id});
+    res.status(200).json({
+      success: true,
+      lists,
     });
   } catch (error) {
     return next(errorHandler(500, error.message));

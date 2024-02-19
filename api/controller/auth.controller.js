@@ -6,6 +6,9 @@ const dotenv = require("dotenv");
 dotenv.config();
 exports.signup = async (req, res, next) => {
   const { username, email, password } = req.body;
+  if (!username || !email || !password) {
+    return next(errorHandler(400, "Please add all fields"));
+  }
   const hashedPassword = bcryptjs.hashSync(password, 10);
   const user = new User({
     username,
