@@ -158,7 +158,7 @@ const Profile = () => {
     try {
       setLoadingListings(true);
       setShowListingsError(false);
-      const res = await fetch(`/api/user/delelteListing/${id}`, {
+      const res = await fetch(`/api/list/delete/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
@@ -170,7 +170,7 @@ const Profile = () => {
         setShowListingsError(true);
         return;
       }
-      setUserListings(data.lists);
+      setUserListings((prev) => prev.filter((item) => item._id !== id));
     }catch(error){
       setLoadingListings(false);
       setShowListingsError(true);
