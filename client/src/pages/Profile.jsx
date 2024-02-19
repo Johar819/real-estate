@@ -4,6 +4,7 @@ import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/
 import { useEffect } from "react";
 import { app } from "../firebase";
 import { Link } from "react-router-dom"
+import ClipLoader from "react-spinners/ClipLoader";
 import {
   updateUserStart,
   updateUserSuccess,
@@ -17,6 +18,7 @@ import {
 } from "../redux/user/userSlice"
 import { useDispatch } from "react-redux";
 import { FaEdit } from 'react-icons/fa'
+import ListCard from "../components/ListingCard";
 const Profile = () => {
   const { currentUser, loading, error } = useSelector(state => state.user);
   const dispatch = useDispatch();
@@ -27,6 +29,9 @@ const Profile = () => {
   const [edit, setEdit] = useState(false);
   const [profileUpdate, setProfileUpdate] = useState(0);
   const [formData, setFormData] = useState({});
+  const [userListings, setUserListings] = useState([]);
+  const [showListingsError,setShowListingsError] = useState(false);
+  const [loadingListings,setLoadingListings] = useState(false);
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   }
@@ -124,6 +129,56 @@ const Profile = () => {
       dispatch(signOutFailure(error.message));
     }
   }
+  const handleShowListings = async () => {
+    try {
+      setShowListingsError(false);
+      setLoadingListings(true);
+      const res = await fetch(`/api/user/listings/${currentUser._id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      });
+      const data = await res.json();
+      console.log(data.lists);
+      setLoadingListings(false);
+      if (data.success === false) {
+        setShowListingsError(true);
+        console.log("error in getting listings");
+        return;
+      }
+      setUserListings(data.lists);
+      console.log(data.lists);
+    }catch(error){
+      setLoadingListings(false);
+      setShowListingsError(true);
+    }
+  }
+  const handleDeleteListing = async (id) => {
+    try {
+      setLoadingListings(true);
+      setShowListingsError(false);
+      const res = await fetch(`/api/user/delelteListing/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await res.json();
+      setLoadingListings(false);
+      if (data.success === false) {
+        setShowListingsError(true);
+        return;
+      }
+      setUserListings(data.lists);
+    }catch(error){
+      setLoadingListings(false);
+      setShowListingsError(true);
+    }
+  }
+  const handleEditListing = async (id) => {
+    
+  }
   return (
     <div className=" p-3 max-w-lg mx-auto">
       <h1 className='text-3xl font-semibold text-center my-7'>Profile</h1>
@@ -165,6 +220,22 @@ const Profile = () => {
         <span className="text-red-500 cursor-pointer" onClick={handleDelete}>Delete Account</span>
         <span onClick={handleSignOut} className="text-red-500 cursor-pointer">Sign Out</span>
       </div>
+      <button type="button" className = "w-full font-semibold text-lg bg-white-700 text-green-500 p-3 rounded-lg hover:opacity-95 text-center" onClick={handleShowListings}>Show Listings</button>
+      <p className="text-red-500 mt-5 italic">{showListingsError ? "Error in fetching listings" : ""}</p>
+      {
+        loadingListings && (
+          <div className="flex justify-center">
+            <ClipLoader size={50} color="red" />
+          </div>
+        )
+      }
+      {
+        !loadingListings && userListings.length > 0 && (
+          userListings.map((list) => (
+            <ListCard key={list._id} listData={list} handleDeleteListing={handleDeleteListing} handleEditListing={handleEditListing} />
+          ))
+        ) 
+      }
     </div>
 
   )

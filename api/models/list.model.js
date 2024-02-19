@@ -4,7 +4,7 @@ const listSchema = new mongoose.Schema({
         type:String,
         require:true
     },
-    descriptin:{
+    description:{
         type:String,
         require:true
     },
