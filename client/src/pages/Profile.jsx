@@ -30,6 +30,7 @@ const Profile = () => {
   const [profileUpdate, setProfileUpdate] = useState(0);
   const [formData, setFormData] = useState({});
   const [userListings, setUserListings] = useState([]);
+  const [userListingRequested,setUserListingRequested] = useState(false);
   const [showListingsError,setShowListingsError] = useState(false);
   const [loadingListings,setLoadingListings] = useState(false);
   const handleChange = (e) => {
@@ -148,6 +149,7 @@ const Profile = () => {
         return;
       }
       setUserListings(data.lists);
+      setUserListingRequested(true);
       console.log(data.lists);
     }catch(error){
       setLoadingListings(false);
@@ -176,9 +178,7 @@ const Profile = () => {
       setShowListingsError(true);
     }
   }
-  const handleEditListing = async (id) => {
-    
-  }
+
   return (
     <div className=" p-3 max-w-lg mx-auto">
       <h1 className='text-3xl font-semibold text-center my-7'>Profile</h1>
@@ -230,11 +230,11 @@ const Profile = () => {
         )
       }
       {
-        !loadingListings && userListings.length > 0 && (
+        !loadingListings && userListings.length > 0 && userListingRequested ? (
           userListings.map((list) => (
-            <ListCard key={list._id} listData={list} handleDeleteListing={handleDeleteListing} handleEditListing={handleEditListing} />
+            <ListCard key={list._id} listData={list} handleDeleteListing={handleDeleteListing} />
           ))
-        ) 
+        ) :!userListingRequested?null: <p className="text-red-500 mt-5 italic">No listings found</p>
       }
     </div>
 

@@ -1,16 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import { app } from "../firebase";
 import { useSelector } from 'react-redux';
-import {useNavigate} from 'react-router-dom'
-const CreateListing = () => {
+import { useNavigate } from 'react-router-dom'
+const UpdateListing = () => {
     const { currentUser } = useSelector((state) => state.user);
     const [file, setFile] = useState([]);
-    const [listingError, setListingError] = useState(0);
+    const [listingError, setListingError] = useState(false);
     const [loading, setLoading] = useState(false);
     const [imageUploadError, setImageUploadError] = useState(false);
     const [uploading, setUploading] = useState(false);
-    const [isUploaded, setIsUploaded] = useState(false);
+    const [updated, setUpdated] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         type: 'rent',
@@ -27,6 +28,32 @@ const CreateListing = () => {
         imageURLs: [],
     });
     const navigate = useNavigate();
+    const { id } = useParams();
+    useEffect(() => {
+        const fetchListing = async () => {
+            try {
+                setLoading(true);
+                setListingError(false);
+                const response = await fetch(`/api/list/get/${id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                setLoading(false);
+                if (data.success === false) {
+                    setListingError(data.message);
+                    return;
+                }
+                setFormData((prev) => ({ ...prev, ...data.list }));
+            } catch (error) {
+                setLoading(false);
+                setListingError(error.message);
+            }
+        }
+        fetchListing();
+    }, [id])
     const handleChange = (e) => {
         if (e.target.id === 'sale' || e.target.id === 'rent') {
             setFormData((prev) => ({ ...prev, type: e.target.id }));
@@ -42,7 +69,6 @@ const CreateListing = () => {
         if (file.length > 0 && file.length + formData.imageURLs.length < 7) {
             setUploading(true);
             setImageUploadError(false);
-            setIsUploaded(false);
             const promises = [];
             for (let i = 0; i < file.length; i++) {
                 promises.push(storeImage(file[i]));
@@ -50,18 +76,14 @@ const CreateListing = () => {
             Promise.all(promises).then((urls) => {
                 setFormData((prev) => ({ ...prev, imageURLs: formData.imageURLs.concat(urls) }));
                 setUploading(false);
-                setIsUploaded(true);
             }).catch((error) => {
                 setImageUploadError("An error occured while uploading images.Maximum size is 2 MB");
                 setUploading(false);
-                setIsUploaded(false);
             })
         } else if (file.length + formData.imageURLs.length > 6) {
             setImageUploadError("You can upload maximum 6 images per listing");
-            setIsUploaded(false);
         } else {
             setImageUploadError("No image is selected");
-            setIsUploaded(false);
         }
     }
     const storeImage = async (imageFile) => {
@@ -91,8 +113,9 @@ const CreateListing = () => {
     }
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setListingError(false);
         try {
-            if (isUploaded === false) {
+            if (formData.imageURLs.length === 0) {
                 setListingError('Please upload images.\nSelect images and then click on UPLOAD button to upload images.');
                 return;
             }
@@ -101,8 +124,7 @@ const CreateListing = () => {
                 return;
             }
             setLoading(true);
-            setListingError(false);
-            const res = await fetch('/api/list/create', {
+            const res = await fetch(`/api/list/update/${id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -116,6 +138,7 @@ const CreateListing = () => {
                 setListingError(data.message);
                 return;
             }
+            setUpdated(true);
             navigate(`/listing/${data.list._id}`);
         } catch (error) {
             setLoading(false);
@@ -124,7 +147,7 @@ const CreateListing = () => {
     }
     return (
         <main className="max-w-4xl mx-auto p-3">
-            <h1 className="text-3xl font-semibold text-center my-7">Create a listing</h1>
+            <h1 className="text-3xl font-semibold text-center my-7 text-slate-700">Update Your listing</h1>
             <form onSubmit={handleSubmit} className="flex flex-col gap-0 sm:flex-row sm:gap-12">
                 <div className="flex flex-col gap-2 flex-1 ">
                     <input onChange={handleChange} value={formData.name} required type="text" placeholder="Name" className="input input-bordered w-full rounded h-[50px] border 1 px-1" id="name" maxLength={60} />
@@ -172,13 +195,13 @@ const CreateListing = () => {
                         {
                             formData.offer &&
                             (
-                            <div className="flex items-center gap-2">
-                                <input onChange={handleChange} value={formData.discountPrice} type="number" name="DiscountPrice " id="discountPrice" min={1} max={5000000} required className="p-3 border border-gray-400 rounded-lg" />
-                                <div className="flex flex-col items-center">
-                                    <p>Discount Price</p>
-                                    <span className="text-[12px]">(<span>&#8377;</span> / Month)</span>
+                                <div className="flex items-center gap-2">
+                                    <input onChange={handleChange} value={formData.discountPrice} type="number" name="DiscountPrice " id="discountPrice" min={1} max={5000000} required className="p-3 border border-gray-400 rounded-lg" />
+                                    <div className="flex flex-col items-center">
+                                        <p>Discount Price</p>
+                                        <span className="text-[12px]">(<span>&#8377;</span> / Month)</span>
+                                    </div>
                                 </div>
-                            </div>
                             )
                         }
                     </div>
@@ -197,13 +220,13 @@ const CreateListing = () => {
                         formData.imageURLs.length > 0 && formData.imageURLs.map((url, index) => (
                             <div key={url} className="flex justify-between items-center border border-gray-300 mb-1 p-1 rounded-lg">
                                 <img src={url} alt="image" className="w-[100px] h-auto object-cover mb-1 rounded-lg" />
-                                <button type="button" className="p-2 bg-white-700 text-red-700 font-semibold rounded-lg uppercase hover:bg-red-700 hover:text-white hover:opacity-95 disabled:80" onClick={() => handleRemoveImage(index)}>Remove</button>
+                                <button className="p-2 bg-white-700 text-red-700 font-semibold rounded-lg uppercase hover:bg-red-700 hover:text-white hover:opacity-95 disabled:80" onClick={() => handleRemoveImage(index)}>Remove</button>
                             </div>)
                         )
                     }
-                    <button disabled={loading || !isUploaded} className="p-3 bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 disabled:80">Create Listing</button>
+                    <button disabled={loading} className="p-3 bg-slate-700 text-white rounded-lg cursor-pointer uppercase hover:opacity-95 disabled:80">Update Listing</button>
                     {
-                        loading ? <p className="text-slate-700 italic max-auto">Loading...</p> : listingError ? <p className="text-red-700 italic max-auto">{listingError}</p> : listingError === 0 ? null : <p className="text-green-700 italic self-center">Listing created!</p>
+                        loading ? <p className="text-slate-700 italic max-auto">Loading...</p> : listingError ? <p className="text-red-700 italic max-auto">{listingError}</p> : null
                     }
                 </div>
             </form>
@@ -211,4 +234,4 @@ const CreateListing = () => {
     )
 }
 
-export default CreateListing
+export default UpdateListing;

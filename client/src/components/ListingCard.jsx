@@ -1,16 +1,14 @@
 import PropTypes from 'prop-types';
-const ListCard = ({ listData, handleDeleteListing, handleEditListing }) => {
+import { Link } from 'react-router-dom';
+const ListCard = ({ listData, handleDeleteListing }) => {
     ListCard.propTypes = {
         listData: PropTypes.object.isRequired,
         handleDeleteListing: PropTypes.func.isRequired,
-        handleEditListing: PropTypes.func.isRequired,
     };
     const handleDelete = () => {
         handleDeleteListing(listData._id);
     }
-    const handleEdit = () => {
-        handleEditListing(listData._id);
-    }
+    
     return (
         <div className="flex flex-col mx-auto mb-5">
             <div className="flex justify-between">
@@ -20,7 +18,9 @@ const ListCard = ({ listData, handleDeleteListing, handleEditListing }) => {
                 </div>
                 <div className="flex flex-col items-center justify-center">
                     <button className="text-red-500 uppercase" onClick={handleDelete}>Delete</button>
-                    <button className='text-green-500 upppercase' onClick={handleEdit}>Edit</button>
+                    <Link to={`/update-listing/${listData._id}`}>
+                    <button className='text-green-500 upppercase'>Edit</button>
+                    </Link>
                 </div>
         </div>
         </div>
