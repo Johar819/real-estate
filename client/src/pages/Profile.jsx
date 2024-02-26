@@ -232,7 +232,9 @@ const Profile = () => {
       {
         !loadingListings && userListings.length > 0 && userListingRequested ? (
           userListings.map((list) => (
-            <ListCard key={list._id} listData={list} handleDeleteListing={handleDeleteListing} />
+            <Link key={list._id} to={`/listing/${list._id}`}> 
+            <ListCard  listData={list} handleDeleteListing={handleDeleteListing} />
+            </Link>
           ))
         ) :!userListingRequested?null: <p className="text-red-500 mt-5 italic">No listings found</p>
       }
