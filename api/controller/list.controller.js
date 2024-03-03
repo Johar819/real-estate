@@ -68,3 +68,46 @@ exports.updateList = async (req, res, next) => {
     next(error);
   }
 };
+
+//get searched list
+exports.getLists = async (req,res,next) =>{
+  try{
+   const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+   const startIndex = req.query.startIndex ? parseInt(req.query.startIndex) : 0;
+   let offer = req.query.offer;
+   if(offer === 'false' || offer === undefined){
+    offer = {$in:[false,true]}
+   }
+
+   let furnished = req.query.furnished;
+   if(furnished === 'false' || furnished === undefined){
+    furnished = {$in:[false,true]}
+   }
+
+   let parking = req.query.parking;
+   if(parking === 'false' || parking === undefined){
+    parking = {$in:[false,true]}
+   }
+
+   let type = req.query.type;
+   if(type === undefined || type === "all"){
+    type = {$in:["rent","sale"]}
+   }
+
+   let searchTerm = req.query.searchTerm || "";
+   let sort = req.query.sort || "createdAt";
+   let order = req.query.order || "desc";
+
+   const lists = await List.find({
+    name: {$regex: searchTerm, $options: "i"},
+    type,
+    offer,
+    furnished,
+    parking
+   }).sort({[sort] : order}).limit(limit).skip(startIndex);
+   
+   return res.status(200).json({success:true,lists})
+  }catch(error){
+    next(error)
+  }
+}
