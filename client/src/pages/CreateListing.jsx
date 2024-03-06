@@ -128,7 +128,7 @@ const CreateListing = () => {
             <form onSubmit={handleSubmit} className="flex flex-col gap-0 sm:flex-row sm:gap-12">
                 <div className="flex flex-col gap-2 flex-1 ">
                     <input onChange={handleChange} value={formData.name} required type="text" placeholder="Name" className="input input-bordered w-full rounded h-[50px] border 1 px-1" id="name" maxLength={60} />
-                    <textarea onChange={handleChange} value={formData.description} required type="text" placeholder="Description" className="input input-bordered w-full h-[100px] border 1 px-1 rounded " id="description" maxLength={120} />
+                    <textarea onChange={handleChange} value={formData.description} required type="text" placeholder="Description" className="input input-bordered w-full h-[100px] border 1 px-1 rounded " id="description" maxLength={300} />
                     <input onChange={handleChange} value={formData.address} required type="text" placeholder="Address" className="input input-bordered w-full rounded h-[50px] border 1 px-1" id="address" />
                     <div className="flex gap-6 flex-wrap">
                         <div className="flex gap-2">

@@ -51,7 +51,7 @@ exports.updateList = async (req, res, next) => {
           type: req.body.type,
           address: req.body.address,
           regularPrice: req.body.regularPrice,
-          discountedPrice: req.body.discountedPrice,
+          discountPrice: req.body.discountPrice,
           description: req.body.description,
           offer: req.body.offer,
           bathrooms: req.body.bathrooms,
