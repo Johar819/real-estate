@@ -53,7 +53,6 @@ const Listing = () => {
 
 
     }, [id])
-    console.log("Particular List", listing);
     return (
         <main>
             {loading && <div className="text-red-500 w-full h-screen flex items-center justify-center"><ClipLoader color="red" size={50} /></div>}

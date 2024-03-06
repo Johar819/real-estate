@@ -141,7 +141,7 @@ const Profile = () => {
         },
       });
       const data = await res.json();
-      console.log(data.lists);
+      // console.log(data.lists);
       setLoadingListings(false);
       if (data.success === false) {
         setShowListingsError(true);
@@ -150,7 +150,7 @@ const Profile = () => {
       }
       setUserListings(data.lists);
       setUserListingRequested(true);
-      console.log(data.lists);
+      // console.log(data.lists);
     }catch(error){
       setLoadingListings(false);
       setShowListingsError(true);

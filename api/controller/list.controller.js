@@ -72,7 +72,7 @@ exports.updateList = async (req, res, next) => {
 //get searched list
 exports.getLists = async (req,res,next) =>{
   try{
-   const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+   const limit = req.query.limit ? parseInt(req.query.limit) : 9;
    const startIndex = req.query.startIndex ? parseInt(req.query.startIndex) : 0;
    let offer = req.query.offer;
    if(offer === 'false' || offer === undefined){
@@ -105,8 +105,9 @@ exports.getLists = async (req,res,next) =>{
     furnished,
     parking
    }).sort({[sort] : order}).limit(limit).skip(startIndex);
+   const count = await List.countDocuments({name: {$regex: searchTerm, $options: "i"}, type, offer, furnished, parking});
    
-   return res.status(200).json({success:true,lists})
+   return res.status(200).json({success:true,lists,count});
   }catch(error){
     next(error)
   }

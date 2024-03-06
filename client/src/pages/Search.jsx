@@ -11,8 +11,11 @@ const Search = () => {
         furnished: false,
         offer: false,
         sort: 'created_at',
-        order: 'desc'
+        order: 'desc',
+
     });
+    const [prevDisable, setPrevDisable] = useState(true);
+    const [nextDisable, setNextDisable] = useState(false);
     const [loading, setLoading] = useState(false);
     const [listings, setListings] = useState([]);
     useEffect(() => {
@@ -45,7 +48,11 @@ const Search = () => {
         if (orderFromUrl) {
             setSearchBarData((prev) => ({ ...prev, order: orderFromUrl || 'desc' }));
         }
-
+        if(urlParams.get('startIndex')==='0' || urlParams.get('startIndex')===null){
+            setPrevDisable(true);
+        }else if(Number(urlParams.get('startIndex')) > 2){
+            setPrevDisable(false);
+        }
 
         //fetching data
         const fectchListings = async () => {
@@ -60,11 +67,15 @@ const Search = () => {
                 })
                 const data = await res.json();
                 setLoading(false);
-                console.log("listings", data.lists);
+                // console.log("listings", data.lists);
                 if (data.success === false) {
                     console.log(data.message);
                     return;
                 }
+                const startPostion = Number(urlParams.get('startIndex'))?Number(urlParams.get('startIndex')):0;
+                if(data.count === data.lists.length+startPostion){
+                    setNextDisable(true);
+                }else setNextDisable(false);
                 setListings(data.lists);
             } catch (error) {
                 console.log(error);
@@ -101,8 +112,35 @@ const Search = () => {
         const searchQuery = urlParams.toString();
         navigate(`/search?${searchQuery}`);
     }
+    const handlePagination = async (flag) => {
+        setLoading(true);
+        const urlParams = new URLSearchParams(window.location.search);
+        if (flag) urlParams.set('startIndex', urlParams.get('startIndex') ? Number(urlParams.get('startIndex')) + 9 : 9);
+        else urlParams.set('startIndex', urlParams.get('startIndex') ? Number(urlParams.get('startIndex')) - 9 : 0);
+        const searchQuery = urlParams.toString();
+        try {
+            const res = await fetch(`api/list/get?${searchQuery}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+            const data = await res.json();
+            setLoading(false);
+            if (data.success === false) {
+                console.log(data.message);
+                return;
+            }
+            // setListings(data.lists);
+            navigate(`/search?${searchQuery}`);
+        } catch (error) {
+            console.log(error);
+            setLoading(false);
+        }
+    }
+
     return (
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col md:flex-row gap-10">
             <div className="p-5 border-b-2 md:border-r-2 md:border-b-0 md:min-h-screen w-screen md:w-[300px]  ">
                 <form onSubmit={handleSubmit} className="flex flex-col gap-7">
                     <div className="flex items-center gap-2">
@@ -210,7 +248,7 @@ const Search = () => {
                 <h1 className="p-3 font-semibold text-3xl text-slate-700 border-b mt-3">Listing Results:</h1>
                 <div className="flex flex-wrap gap-2">
                     {
-                        !loading && listings.length===0 && (<p className="text-xl text-slate-700"> No Listings Found </p>)
+                        !loading && listings.length === 0 && (<p className="text-xl text-slate-700"> No Listings Found </p>)
                     }
                     {
                         loading && (<p className="text-xl text-slate-700 w-full text-center"> Loading... </p>)
@@ -221,6 +259,18 @@ const Search = () => {
                         ))
                     }
                 </div>
+                    {
+                        !loading && listings && (
+                            <div className="flex justify-center gap-5 font-bold">
+                                <button
+                                    className={`${prevDisable ? 'text-gray-400' : 'text-gray-800'}`} 
+                                    onClick={()=>handlePagination(false)} disabled = {prevDisable} type="button">Prev</button>
+                                <button
+                                    className={`${nextDisable ? 'text-gray-400' : 'text-gray-800'}`} 
+                                    onClick={()=>handlePagination(true)} disabled = {nextDisable} type="button">Next</button>
+                            </div>
+                        )
+                    }
             </div>
         </div>
     )

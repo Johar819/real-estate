@@ -27,7 +27,7 @@ const UpdateListing = () => {
         offer: false,
         imageURLs: [],
     });
-    console.log("update form data",formData)
+    // console.log("update form data",formData)
     const navigate = useNavigate();
     const { id } = useParams();
     useEffect(() => {
