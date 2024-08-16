@@ -1,21 +1,21 @@
 import { errorHandler } from "../utils/error";
-import { findByIdAndUpdate, findByIdAndDelete, findById } from "../models/user.model";
-import { hashSync } from "bcryptjs";
-import { find } from "../models/list.model";
-export function test(req, res) {
+import User from "../models/user.model"
+import bcryptjs from "bcryptjs"
+import List from "../models/list.model"
+exports.test = (req, res) => {
   res.json({
     message: "API route is working",
   });
-}
+};
 
-export async function updateUser(req, res, next) {
+exports.updateUser = async (req, res, next) => {
   try {
     if (req.user.id !== req.params.id)
       return next(errorHandler(403, "You can update only your account"));
     if (req.body.password) {
-      req.body.password = hashSync(req.body.password, 10);
+      req.body.password = bcryptjs.hashSync(req.body.password, 10);
     }
-    const updatedUser = await findByIdAndUpdate(
+    const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
       {
         $set: {
@@ -36,15 +36,15 @@ export async function updateUser(req, res, next) {
   } catch (error) {
     return next(errorHandler(500, error.message));
   }
-}
+};
 
 
 //delete User controller 
-export async function deleteUser(req, res, next) {
+exports.deleteUser = async (req, res, next) => {
   try {
     if (req.user.id !== req.params.id)
       return next(errorHandler(403, "You can delete only your account"));
-    await findByIdAndDelete(req.params.id);
+    await User.findByIdAndDelete(req.params.id);
     res.status(200).clearCookie("access_token").json({
       success: true,
       message: "User deleted successfully",
@@ -52,15 +52,15 @@ export async function deleteUser(req, res, next) {
   } catch (error) {
     return next(errorHandler(500, error.message));
   }
-}
+};
 
 //get lists
-export async function getUserLists(req, res, next) {
+exports.getUserLists = async (req, res, next) => {
   try {
     if (req.user.id !== req.params.id)
       return next(errorHandler(401, "You can get only your own Listings!"));
 
-    const lists = await find({userRef: req.params.id});
+    const lists = await List.find({userRef: req.params.id});
     res.status(200).json({
       success: true,
       lists,
@@ -68,11 +68,11 @@ export async function getUserLists(req, res, next) {
   } catch (error) {
     return next(errorHandler(500, error.message));
   }
-}
+};
 
-export async function getUser(req, res, next) {
+exports.getUser = async (req, res, next) => {
   try{
-    const user = await findById(req.params.id);
+    const user = await User.findById(req.params.id);
     if(!user) return next(errorHandler(404, "User not found"));
     const {password, ...rest} = user._doc;
     return res.status(200).json({success: true, rest});
