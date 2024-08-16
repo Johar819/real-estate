@@ -3,7 +3,7 @@ import { errorHandler } from '../utils/error.js';
 
 export const createList = async (req, res, next) => {
   try {
-    const List = await List.create(req.body);
+    const list = await List.create(req.body);
     return res.status(201).json(List);
   } catch (error) {
     next(error);
@@ -11,9 +11,9 @@ export const createList = async (req, res, next) => {
 };
 
 export const deleteList = async (req, res, next) => {
-  const List = await List.findById(req.params.id);
+  const list = await List.findById(req.params.id);
 
-  if (!List) {
+  if (!list) {
     return next(errorHandler(404, 'List not found!'));
   }
 
@@ -30,8 +30,8 @@ export const deleteList = async (req, res, next) => {
 };
 
 export const updateList = async (req, res, next) => {
-  const List = await List.findById(req.params.id);
-  if (!List) {
+  const list = await List.findById(req.params.id);
+  if (!list) {
     return next(errorHandler(404, 'List not found!'));
   }
   if (req.user.id !== List.userRef) {
@@ -52,8 +52,8 @@ export const updateList = async (req, res, next) => {
 
 export const getList = async (req, res, next) => {
   try {
-    const List = await List.findById(req.params.id);
-    if (!List) {
+    const list = await List.findById(req.params.id);
+    if (!list) {
       return next(errorHandler(404, 'List not found!'));
     }
     res.status(200).json(List);
@@ -96,7 +96,7 @@ export const getLists = async (req, res, next) => {
 
     const order = req.query.order || 'desc';
 
-    const Lists = await List.find({
+    const lists = await List.find({
       name: { $regex: searchTerm, $options: 'i' },
       offer,
       furnished,
@@ -107,7 +107,7 @@ export const getLists = async (req, res, next) => {
       .limit(limit)
       .skip(startIndex);
 
-    return res.status(200).json(Lists);
+    return res.status(200).json(lists);
   } catch (error) {
     next(error);
   }
