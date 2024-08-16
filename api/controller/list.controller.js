@@ -1,35 +1,35 @@
-const mongoose = require("mongoose");
-const List = require("../models/list.model");
-exports.createList = async (req, res, next) => {
+import { isValidObjectId } from "mongoose";
+import { create, findById, findByIdAndDelete, findByIdAndUpdate, find, countDocuments } from "../models/list.model";
+export async function createList(req, res, next) {
   try {
-    const list = await List.create(req.body);
+    const list = await create(req.body);
     return res.status(200).json({ success: true, list });
   } catch (error) {
     next(error);
   }
-};
+}
 
 //delete listing
-exports.deleteList = async (req, res, next) => {
+export async function deleteList(req, res, next) {
   try {
-    const userList = await List.findById(req.params.id);
+    const userList = await findById(req.params.id);
     if (!userList) return next(errorHandler(404, "List not found"));
     if (userList.userRef.toString() !== req.user.id)
       return next(errorHandler(403, "You can delete only your list"));
-    await List.findByIdAndDelete(req.params.id);
+    await findByIdAndDelete(req.params.id);
     return res
       .status(200)
       .json({ success: true, message: "List deleted successfully" });
   } catch (error) {
     next(error);
   }
-};
+}
 
 //get listing
-exports.getList = async (req, res, next) => {
+export async function getList(req, res, next) {
   try {
-    if(!mongoose.isValidObjectId(req.params.id)) return next(errorHandler(400, "Invalid Id"));
-    const list = await List.findById(req.params.id);
+    if(!isValidObjectId(req.params.id)) return next(errorHandler(400, "Invalid Id"));
+    const list = await findById(req.params.id);
     if (!list) return next(errorHandler(404, "Listing not found"));
     return res.status(200).json({ success: true, list });
   } catch (error) {
@@ -37,13 +37,13 @@ exports.getList = async (req, res, next) => {
   }
 }
 //update Listing
-exports.updateList = async (req, res, next) => {
+export async function updateList(req, res, next) {
   try {
-    const userList = await List.findById(req.params.id);
+    const userList = await findById(req.params.id);
     if (!userList) return next(errorHandler(404, "List not found"));
     if (userList.userRef.toString() !== req.user.id)
       return next(errorHandler(403, "You can update only your list"));
-    const list = await List.findByIdAndUpdate(
+    const list = await findByIdAndUpdate(
       req.params.id,
       {
         $set: {
@@ -67,10 +67,10 @@ exports.updateList = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
+}
 
 //get searched list
-exports.getLists = async (req,res,next) =>{
+export async function getLists(req,res,next){
   try{
    const limit = req.query.limit ? parseInt(req.query.limit) : 9;
    const startIndex = req.query.startIndex ? parseInt(req.query.startIndex) : 0;
@@ -98,14 +98,14 @@ exports.getLists = async (req,res,next) =>{
    let sort = req.query.sort || "createdAt";
    let order = req.query.order || "desc";
 
-   const lists = await List.find({
+   const lists = await find({
     name: {$regex: searchTerm, $options: "i"},
     type,
     offer,
     furnished,
     parking
    }).sort({[sort] : order}).limit(limit).skip(startIndex);
-   const count = await List.countDocuments({name: {$regex: searchTerm, $options: "i"}, type, offer, furnished, parking});
+   const count = await countDocuments({name: {$regex: searchTerm, $options: "i"}, type, offer, furnished, parking});
    return res.status(200).json({success:true,lists,count});
   }catch(error){
     next(error)

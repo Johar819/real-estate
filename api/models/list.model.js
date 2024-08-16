@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const listSchema = new mongoose.Schema({
+import { Schema, model } from "mongoose";
+const listSchema = new Schema({
     name:{
         type:String,
         require:true
@@ -50,9 +50,9 @@ const listSchema = new mongoose.Schema({
         require:true
     }],
     userRef:{
-        type:mongoose.Schema.Types.ObjectId,
+        type:Schema.Types.ObjectId,
         ref:"User"
     }
 },{timestamps:true});
-const List = mongoose.model('List',listSchema);
-module.exports = List;
+const List = model('List',listSchema);
+export default List;

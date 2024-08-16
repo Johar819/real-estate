@@ -1,14 +1,13 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const dotenv = require("dotenv");
-const userRouter = require("./routes/user.route.js");
-const authRouter = require("./routes/auth.route.js");
-const listRouter = require("./routes/list.route.js");
-const cookieParser = require("cookie-parser");
-const path = require("path");
-dotenv.config();
-mongoose
-  .connect(process.env.MONGODB_URL, {})
+import express from "express";
+import { connect } from "mongoose";
+import { config } from "dotenv";
+import userRouter from "./routes/user.route.js";
+import authRouter from "./routes/auth.route.js";
+import listRouter from "./routes/list.route.js";
+import cookieParser from "cookie-parser";
+import { resolve, join } from "path";
+config();
+connect(process.env.MONGODB_URL, {})
   .then(() => {
     console.log("Database Connection Established Successfully");
   })
@@ -18,17 +17,17 @@ mongoose
     process.exit(1);
   });
 
-const __dirname = path.resolve();
+const __dirname = resolve();
 const app = express();
 app.use(cookieParser());
-app.use(express.json());
+app.use(json());
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/list", listRouter);
-app.use(express.static(path.join(__dirname, '/client/dist')));
+app.use(express.static(join(__dirname, '/client/dist')));
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+  res.sendFile(join(__dirname, 'client', 'dist', 'index.html'));
 })
 
 app.use((err, req, res, next) => {
