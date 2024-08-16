@@ -1,7 +1,7 @@
 import { Router } from "express";
 const router  = Router();
-import { test, updateUser, deleteUser, getUserLists, getUser } from "../controller/user.controller";
-import { verifyUser } from "../utils/verifyUser";
+import { test, updateUser, deleteUser, getUserLists, getUser } from "../controller/user.controller.js";
+import { verifyUser } from "../utils/verifyUser.js";
 router.get('/test',test)
 router.post('/update/:id',verifyUser,updateUser);
 router.delete('/delete/:id',verifyUser,deleteUser);

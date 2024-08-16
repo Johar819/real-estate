@@ -1,4 +1,4 @@
-import { errorHandler } from "./error";
+import { errorHandler } from "./error.js";
 import { verify } from "jsonwebtoken";
 export async function verifyUser(req,res,next){    
         const token = req.cookies.access_token;

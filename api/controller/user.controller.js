@@ -1,7 +1,7 @@
-import { errorHandler } from "../utils/error";
-import User from "../models/user.model"
+import { errorHandler } from "../utils/error.js";
+import User from "../models/user.model.js"
 import bcryptjs from "bcryptjs"
-import List from "../models/list.model"
+import List from "../models/list.model.js"
 exports.test = (req, res) => {
   res.json({
     message: "API route is working",
