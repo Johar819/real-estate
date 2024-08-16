@@ -1,13 +1,13 @@
 import express from "express";
-import { connect } from "mongoose";
-import { config } from "dotenv";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
 import userRouter from "./routes/user.route.js";
 import authRouter from "./routes/auth.route.js";
 import listRouter from "./routes/list.route.js";
 import cookieParser from "cookie-parser";
-import { resolve, join } from "path";
-config();
-connect(process.env.MONGODB_URL, {})
+import path from "path";
+dotenv.config();
+mongoose.connect(process.env.MONGODB_URL)
   .then(() => {
     console.log("Database Connection Established Successfully");
   })
@@ -17,17 +17,17 @@ connect(process.env.MONGODB_URL, {})
     process.exit(1);
   });
 
-const __dirname = resolve();
+const __dirname = path.resolve();
 const app = express();
 app.use(cookieParser());
 app.use(json());
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/list", listRouter);
-app.use(express.static(join(__dirname, '/client/dist')));
+app.use(express.static(path.join(__dirname, '/client/dist')));
 
 app.get('*', (req, res) => {
-  res.sendFile(join(__dirname, 'client', 'dist', 'index.html'));
+  res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
 })
 
 app.use((err, req, res, next) => {
