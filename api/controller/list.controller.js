@@ -1,5 +1,5 @@
 import { isValidObjectId } from "mongoose";
-import { create, findById, findByIdAndDelete, findByIdAndUpdate, find, countDocuments } from "../models/list.model";
+import { create, findById, findByIdAndDelete, findByIdAndUpdate, find, countDocuments } from "../models/list.model.js";
 export async function createList(req, res, next) {
   try {
     const list = await create(req.body);
