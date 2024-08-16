@@ -20,7 +20,7 @@ mongoose.connect(process.env.MONGODB_URL)
 const __dirname = path.resolve();
 const app = express();
 app.use(cookieParser());
-app.use(json());
+app.use(express.json());
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/list", listRouter);
