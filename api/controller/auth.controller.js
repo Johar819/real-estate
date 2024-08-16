@@ -1,79 +1,127 @@
-import User from '../models/user.model.js';
-import bcryptjs from 'bcryptjs';
-import { errorHandler } from '../utils/error.js';
-import jwt from 'jsonwebtoken';
-
-export const signup = async (req, res, next) => {
+//authentication controller
+import User, { findOne } from "../models/user.model.js";
+import { hashSync, compareSync } from "bcryptjs";
+import { errorHandler } from "../utils/error.js";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
+export async function signup(req, res, next) {
   const { username, email, password } = req.body;
-  const hashedPassword = bcryptjs.hashSync(password, 10);
-  const newUser = new User({ username, email, password: hashedPassword });
-  try {
-    await newUser.save();
-    res.status(201).json('User created successfully!');
-  } catch (error) {
-    next(error);
+  if (!username || !email || !password) {
+    return next(errorHandler(400, "Please add all fields"));
   }
-};
+  const hashedPassword = hashSync(password, 10);
+  const user = new User({
+    username,
+    email,
+    password: hashedPassword,
+  });
+  try {
+    await user.save();
+    res.status(201).json({
+      message: "User created successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+}
 
-export const signin = async (req, res, next) => {
+export async function signin(req, res, next) {
   const { email, password } = req.body;
   try {
-    const validUser = await User.findOne({ email });
-    if (!validUser) return next(errorHandler(404, 'User not found!'));
-    const validPassword = bcryptjs.compareSync(password, validUser.password);
-    if (!validPassword) return next(errorHandler(401, 'Wrong credentials!'));
-    const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET);
-    const { password: pass, ...rest } = validUser._doc;
+    const validUser = await findOne({ email });
+    if (!validUser) {
+      return next(errorHandler(404, "User not found"));
+    }
+    const validPassword = compareSync(password, validUser.password);
+    if (!validPassword) {
+      return next(errorHandler(401, "Incorrect Password"));
+    }
+    const { password: pass, ...others } = validUser._doc;
+    const token = sign(
+      {
+        id: validUser._id,
+      },
+      process.env.JWT_SECRET
+    );
     res
-      .cookie('access_token', token, { httpOnly: true })
+      .cookie("access_token", token, {
+        httpOnly: true,
+      })
       .status(200)
-      .json(rest);
-  } catch (error) {
-    next(error);
+      .json({
+        others,
+      });
+  } catch (err) {
+    next(err);
   }
-};
+}
 
-export const google = async (req, res, next) => {
+export async function google(req, res, next) {
+  const { email } = req.body;
   try {
-    const user = await User.findOne({ email: req.body.email });
+    const user = await findOne({ email });
     if (user) {
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-      const { password: pass, ...rest } = user._doc;
+      const { password: pass, ...others } = user._doc;
+      const token = sign(
+        {
+          id: user._id,
+        },
+        process.env.JWT_SECRET
+      );
       res
-        .cookie('access_token', token, { httpOnly: true })
+        .cookie("access_token", token, {
+          httpOnly: true,
+        })
         .status(200)
-        .json(rest);
+        .json({
+          others,
+        });
     } else {
       const generatedPassword =
         Math.random().toString(36).slice(-8) +
         Math.random().toString(36).slice(-8);
-      const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
+      const hashedPassword = hashSync(generatedPassword, 10);
       const newUser = new User({
         username:
-          req.body.name.split(' ').join('').toLowerCase() +
-          Math.random().toString(36).slice(-4),
-        email: req.body.email,
+        req.body.name.split(" ").join("").toLowerCase() +
+        Math.random().toString(36).slice(-4),
+        email,
         password: hashedPassword,
-        avatar: req.body.photo,
+        avatar: req.body.avatar,
       });
       await newUser.save();
-      const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
-      const { password: pass, ...rest } = newUser._doc;
+      const jwtToken = sign(
+        {
+          id: newUser._id,
+        },
+        process.env.JWT_SECRET
+      );
+      const { password: pass, ...others } = newUser._doc;
+
       res
-        .cookie('access_token', token, { httpOnly: true })
+        .cookie("access_token", jwtToken, {
+          httpOnly: true,
+        })
         .status(200)
-        .json(rest);
+        .json({
+          others,
+        });
     }
   } catch (error) {
     next(error);
   }
-};
+}
 
-export const signOut = async (req, res, next) => {
+//sign out
+export function signout(req, res,next) {
   try {
-    res.clearCookie('access_token');
-    res.status(200).json('User has been logged out!');
+    return res.status(200).clearCookie("access_token").json({
+      message: "User logged out successfully",
+      success: true
+    })
   } catch (error) {
-    next(error);
+    next(error)
+    
   }
-};
+}
