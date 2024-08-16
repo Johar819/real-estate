@@ -1,3 +1,4 @@
+//authentication controller
 const User = require("../models/user.model.js");
 const bcryptjs = require("bcryptjs");
 const { errorHandler } = require("../utils/error.js");

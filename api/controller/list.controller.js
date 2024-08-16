@@ -106,7 +106,6 @@ exports.getLists = async (req,res,next) =>{
     parking
    }).sort({[sort] : order}).limit(limit).skip(startIndex);
    const count = await List.countDocuments({name: {$regex: searchTerm, $options: "i"}, type, offer, furnished, parking});
-   
    return res.status(200).json({success:true,lists,count});
   }catch(error){
     next(error)
