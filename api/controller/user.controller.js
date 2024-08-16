@@ -8,7 +8,7 @@ exports.test = (req, res) => {
   });
 };
 
-exports.updateUser = async (req, res, next) => {
+export const updateUser = async (req, res, next) => {
   try {
     if (req.user.id !== req.params.id)
       return next(errorHandler(403, "You can update only your account"));
@@ -40,7 +40,7 @@ exports.updateUser = async (req, res, next) => {
 
 
 //delete User controller 
-exports.deleteUser = async (req, res, next) => {
+export const deleteUser = async (req, res, next) => {
   try {
     if (req.user.id !== req.params.id)
       return next(errorHandler(403, "You can delete only your account"));
@@ -55,7 +55,7 @@ exports.deleteUser = async (req, res, next) => {
 };
 
 //get lists
-exports.getUserLists = async (req, res, next) => {
+export const getUserLists = async (req, res, next) => {
   try {
     if (req.user.id !== req.params.id)
       return next(errorHandler(401, "You can get only your own Listings!"));
@@ -70,7 +70,7 @@ exports.getUserLists = async (req, res, next) => {
   }
 };
 
-exports.getUser = async (req, res, next) => {
+export const getUser = async (req, res, next) => {
   try{
     const user = await User.findById(req.params.id);
     if(!user) return next(errorHandler(404, "User not found"));
